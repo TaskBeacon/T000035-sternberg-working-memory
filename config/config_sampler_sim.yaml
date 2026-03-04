@@ -1,0 +1,187 @@
+subinfo_fields:
+  - name: subject_id
+    type: int
+    constraints:
+      min: 101
+      max: 999
+      digits: 3
+
+subinfo_mapping:
+  subject_id: Subject ID (3 digits)
+  registration_failed: Registration failed
+  registration_successful: Registration successful
+  invalid_input: "{field} is invalid"
+
+window:
+  size: [1280, 720]
+  units: pix
+  screen: 0
+  bg_color: black
+  fullscreen: false
+  monitor_width_cm: 35.5
+  monitor_distance_cm: 60
+
+task:
+  task_name: sternberg_working_memory
+  save_path: ./outputs/sim_sampler
+  language: English
+  voice_name: en-US-AriaNeural
+  voice_enabled: false
+  total_blocks: 1
+  total_trials: 9
+  trial_per_block: 9
+  conditions: [set3, set5, set7]
+  condition_weights: [1, 1, 1]
+  set_sizes: [3, 5, 7]
+  probe_old_prob: 0.5
+  letter_pool: [B, D, F, G, H, K, L, M, P, Q, R, T]
+  key_list: [f, j, space]
+  old_key: f
+  new_key: j
+  feedback_score_correct: 1
+  feedback_score_incorrect: 0
+  feedback_score_timeout: 0
+  seed_mode: same_across_sub
+
+timing:
+  memory_set_duration: 0.25
+  retention_duration: 0.25
+  probe_duration: 0.35
+  feedback_duration: 0.2
+  iti_duration: 0.2
+
+stimuli:
+  instruction_text:
+    type: text
+    text: |
+      Sternberg Working Memory (Sampler Sim)
+      Press SPACE to begin.
+    color: white
+    height: 28
+    wrapWidth: 980
+    font: Arial
+  fixation:
+    type: text
+    text: "+"
+    color: white
+    height: 48
+    font: Arial
+  memory_set_text:
+    type: text
+    text: "{memory_set_display}"
+    color: white
+    height: 58
+    wrapWidth: 980
+    font: Arial
+  probe_text:
+    type: text
+    text: "Probe: {probe_item}"
+    color: white
+    height: 56
+    wrapWidth: 980
+    pos: [0, 50]
+    font: Arial
+  probe_hint:
+    type: text
+    text: "{old_key} = OLD (in set)     {new_key} = NEW (not in set)"
+    color: [0.85, 0.85, 0.85]
+    height: 28
+    wrapWidth: 980
+    pos: [0, -120]
+    font: Arial
+  feedback_correct:
+    type: text
+    text: "Correct\n+{score_delta} point\nTotal: {score_after}"
+    color: [0.0, 0.9, 0.0]
+    height: 34
+    wrapWidth: 900
+    font: Arial
+  feedback_incorrect:
+    type: text
+    text: "Incorrect\nCorrect answer: {correct_key}\nTotal: {score_after}"
+    color: [0.95, 0.2, 0.2]
+    height: 34
+    wrapWidth: 900
+    font: Arial
+  feedback_timeout:
+    type: text
+    text: "Too slow\nCorrect answer: {correct_key}\nTotal: {score_after}"
+    color: [0.95, 0.7, 0.2]
+    height: 34
+    wrapWidth: 900
+    font: Arial
+  block_break:
+    type: text
+    text: |
+      Block {block_num}/{total_blocks} complete
+      Accuracy: {block_acc:.1%}
+      Score: {score_after}
+
+      Press SPACE for the next block.
+    color: white
+    height: 28
+    wrapWidth: 980
+    font: Arial
+  good_bye:
+    type: text
+    text: |
+      Sampler Sim complete
+      Final accuracy: {final_acc:.1%}
+      Final score: {total_score}
+      Total trials: {total_trials}
+
+      Press SPACE to exit.
+    color: white
+    height: 30
+    wrapWidth: 980
+    font: Arial
+
+triggers:
+  map:
+    exp_onset: 1
+    exp_end: 2
+    block_onset: 10
+    block_end: 11
+    memory_set_onset: 20
+    memory_set_3_onset: 23
+    memory_set_5_onset: 25
+    memory_set_7_onset: 27
+    retention_onset: 30
+    probe_onset: 40
+    probe_old_response: 41
+    probe_new_response: 42
+    probe_timeout: 43
+    feedback_correct_onset: 50
+    feedback_incorrect_onset: 51
+    feedback_timeout_onset: 52
+    iti_onset: 60
+  driver:
+    type: serial_url
+    url: loop://
+    baudrate: 115200
+  timing:
+    post_delay_ms: 1
+  policy:
+    strict: false
+
+controller:
+  random_seed: 35035
+
+sim:
+  output_dir: outputs/sim_sampler
+  seed: 35035
+  participant_id: sim001
+  session_id: sub-sim001_task-sternberg_working_memory_sampler_seed35035
+  log_path: outputs/sim_sampler/sub-sim001_task-sternberg_working_memory_sampler_seed35035_sim_events.jsonl
+  policy: warn
+  default_rt_s: 0.22
+  clamp_rt: false
+  responder:
+    type: responders.task_sampler:TaskSamplerResponder
+    kwargs:
+      old_key: f
+      new_key: j
+      continue_key: space
+      accuracy: 0.82
+      rt_mean_s: 0.28
+      rt_sd_s: 0.05

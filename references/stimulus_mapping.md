@@ -1,0 +1,14 @@
+# Stimulus Mapping
+
+## Mapping Table
+
+| Condition | Stage/Phase | Stimulus IDs | Participant-Facing Content | Source Paper ID | Evidence (quote/figure/table) | Implementation Mode | Asset References | Notes |
+|---|---|---|---|---|---|---|---|---|
+| `set3` | `memory_set` | `memory_set_text` | Three-letter memory set shown simultaneously (for example `B  K  P`). | `W2166667242` | Load manipulation in working memory is implemented by varying memory-set size. | `psychopy_builtin` | `config/config.yaml -> stimuli.memory_set_text` | Runtime formats `memory_set_display` from sampled set members. |
+| `set5` | `memory_set` | `memory_set_text` | Five-letter memory set shown simultaneously. | `W2166667242` | Same load-manipulation rationale with larger set size. | `psychopy_builtin` | `config/config.yaml -> stimuli.memory_set_text` | Trigger family includes set-size-specific markers. |
+| `set7` | `memory_set` | `memory_set_text` | Seven-letter memory set shown simultaneously. | `W2166667242` | Higher load condition used to test memory-scanning/maintenance cost. | `psychopy_builtin` | `config/config.yaml -> stimuli.memory_set_text` | Condition label is internal; participants see letters only. |
+| `all_conditions` | `retention` | `fixation` | Central fixation cross during delay period with no response. | `W2161908852` | Delay-period dynamics are key in WM maintenance paradigms. | `psychopy_builtin` | `config/config.yaml -> stimuli.fixation` | Same fixation used in ITI. |
+| `all_conditions` | `probe_response` | `probe_text`, `probe_hint` | Probe letter plus OLD/NEW key reminder (`F` old, `J` new). | `W2063007271` | Recognition phase requires binary decision on probe membership. | `psychopy_builtin` | `config/config.yaml -> stimuli.probe_text/probe_hint` | Keys are injected from config; no hardcoded participant labels in runtime. |
+| `all_conditions` | `feedback` | `feedback_correct`, `feedback_incorrect`, `feedback_timeout` | Outcome text indicating correctness/timeout and cumulative score. | `W1969647331` | Trial-wise performance outcomes are commonly tracked in WM task variants. | `psychopy_builtin` | `config/config.yaml -> stimuli.feedback_*` | Behavioral adaptation; scoring is secondary to RT/accuracy. |
+| `all_conditions` | `inter_trial_interval` | `fixation` | Central fixation during ITI. | `W2161908852` | Event separation improves phase-level interpretation. | `psychopy_builtin` | `config/config.yaml -> stimuli.fixation` | Shared with retention phase. |
+| `all_conditions` | `instruction_and_break_pages` | `instruction_text`, `block_break`, `good_bye` | Instructions, block summary, and final summary pages; continue with SPACE. | `W2121570466` | WM task compliance requires explicit instruction and response rule communication. | `psychopy_builtin` | `config/config.yaml -> stimuli.instruction_text/block_break/good_bye` | Summary screens are outside trial scoring logic. |

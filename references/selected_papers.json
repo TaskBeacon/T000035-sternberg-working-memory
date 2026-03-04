@@ -1,0 +1,112 @@
+[
+  {
+    "id": "W2166667242",
+    "title": "The magical number 4 in short-term memory: A reconsideration of mental storage capacity",
+    "authors": [
+      "Nelson Cowan"
+    ],
+    "year": 2001,
+    "journal": "Behavioral and Brain Sciences",
+    "doi_or_url": "https://doi.org/10.1017/s0140525x01003922",
+    "citation_count": 6672,
+    "is_high_impact": false,
+    "open_access": true,
+    "used_for": [
+      "task_workflow",
+      "timing_parameters"
+    ],
+    "parameter_bindings": {},
+    "notes": ""
+  },
+  {
+    "id": "W2063007271",
+    "title": "Serial attention within working memory",
+    "authors": [
+      "Hugh Garavan"
+    ],
+    "year": 1998,
+    "journal": "Memory & Cognition",
+    "doi_or_url": "https://doi.org/10.3758/bf03201138",
+    "citation_count": 381,
+    "is_high_impact": false,
+    "open_access": true,
+    "used_for": [
+      "task_workflow",
+      "timing_parameters"
+    ],
+    "parameter_bindings": {},
+    "notes": ""
+  },
+  {
+    "id": "W1969647331",
+    "title": "Gamma-Band Activity in Human Prefrontal Cortex Codes for the Number of Relevant Items Maintained in Working Memory",
+    "authors": [
+      "Frédéric Roux",
+      "Michael Wibral",
+      "Harald M. Mohr",
+      "Wolf Singer",
+      "Peter J. Uhlhaas"
+    ],
+    "year": 2012,
+    "journal": "Journal of Neuroscience",
+    "doi_or_url": "https://doi.org/10.1523/jneurosci.0421-12.2012",
+    "citation_count": 341,
+    "is_high_impact": false,
+    "open_access": true,
+    "used_for": [
+      "task_workflow",
+      "timing_parameters"
+    ],
+    "parameter_bindings": {},
+    "notes": ""
+  },
+  {
+    "id": "W2161908852",
+    "title": "Gating of Human Theta Oscillations by a Working Memory Task",
+    "authors": [
+      "Sridhar Raghavachari",
+      "Michael J. Kahana",
+      "Daniel S. Rizzuto",
+      "Jeremy B. Caplan",
+      "Matthew P. Kirschen",
+      "Blaise F. D. Bourgeois",
+      "Joseph R. Madsen",
+      "John Lisman"
+    ],
+    "year": 2001,
+    "journal": "Journal of Neuroscience",
+    "doi_or_url": "https://doi.org/10.1523/jneurosci.21-09-03175.2001",
+    "citation_count": 802,
+    "is_high_impact": false,
+    "open_access": true,
+    "used_for": [
+      "task_workflow",
+      "timing_parameters"
+    ],
+    "parameter_bindings": {},
+    "notes": ""
+  },
+  {
+    "id": "W2121570466",
+    "title": "Decoding Attended Information in Short-term Memory: An EEG Study",
+    "authors": [
+      "Joshua J. LaRocque",
+      "Jarrod A. Lewis‐Peacock",
+      "Andrew T. Drysdale",
+      "Klaus Oberauer",
+      "Bradley R. Postle"
+    ],
+    "year": 2012,
+    "journal": "Journal of Cognitive Neuroscience",
+    "doi_or_url": "https://doi.org/10.1162/jocn_a_00305",
+    "citation_count": 299,
+    "is_high_impact": true,
+    "open_access": true,
+    "used_for": [
+      "task_workflow",
+      "timing_parameters"
+    ],
+    "parameter_bindings": {},
+    "notes": ""
+  }
+]

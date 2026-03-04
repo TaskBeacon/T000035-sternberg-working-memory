@@ -1,0 +1,18 @@
+# CHANGELOG
+
+## [0.1.0] - 2026-03-04
+
+### Added
+- Initial Sternberg Working Memory task scaffold (`T000035`).
+- Mode-aware runtime in `main.py` for `human|qa|sim`.
+- Sternberg trial implementation in `src/run_trial.py` with `memory_set`, `retention`, `probe_response`, `feedback`, and `inter_trial_interval` phases.
+- Trial controller in `src/utils.py` for memory/probe sampling and score/accuracy tracking.
+- Config suite: `config/config.yaml`, `config/config_qa.yaml`, `config/config_scripted_sim.yaml`, `config/config_sampler_sim.yaml`.
+- Sampler responder plugin in `responders/task_sampler.py`.
+- Initial docs/metadata and reference artifacts.
+
+### Changed
+- None.
+
+### Fixed
+- None.

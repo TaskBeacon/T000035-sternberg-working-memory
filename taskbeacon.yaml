@@ -1,0 +1,20 @@
+id: T000035
+slug: sternberg-working-memory
+title: Sternberg Working Memory Task
+acquisition: behavior
+variant: baseline
+cognitive_domain:
+  - working_memory
+  - cognitive_control
+maturity: draft
+version:
+  release_tag: v0.1.0-dev
+contracts:
+  psyflow_taps: v0.1.0
+evidence:
+  - W2166667242
+  - W2063007271
+  - W1969647331
+  - W2161908852
+  - W2121570466
+maintainer: []
