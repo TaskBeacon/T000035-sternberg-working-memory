@@ -1,0 +1,205 @@
+{
+  "task_plot_spec": {
+    "spec_version": "0.2",
+    "meta": {
+      "task_name": "Sternberg Working Memory Task",
+      "mode": "existing",
+      "task_id": ""
+    },
+    "figure": {
+      "output": {
+        "filename": "task_flow.png",
+        "dpi": 300,
+        "width_in": 16.0,
+        "background": "white"
+      },
+      "layout": {
+        "max_conditions": 4,
+        "screens_per_timeline": 6,
+        "screen_overlap_ratio": 0.1,
+        "screen_slope": 0.08,
+        "screen_slope_deg": 25.0,
+        "timeline_gap": 0.18,
+        "screen_aspect_ratio": 1.4545454545454546,
+        "left_margin": 0.2,
+        "right_margin": 0.03,
+        "top_margin": 0.03,
+        "bottom_margin": 0.05,
+        "condition_label_gap": 0.014,
+        "phase_label_pad": 0.01,
+        "duration_label_gap": 0.006,
+        "timeline_arrow_gap": 0.01,
+        "timeline_arrow_screen_clearance": 0.007,
+        "timeline_arrow_text_clearance": 0.01,
+        "timeline_arrow_extra_per_screen": 0.015,
+        "timeline_arrow_min_y": 0.02,
+        "timeline_arrow_max_y": 0.96
+      }
+    },
+    "timelines": [
+      {
+        "condition": "set3",
+        "display_condition_label": "Set3",
+        "phases": [
+          {
+            "phase_name": "memory set",
+            "display_phase_label": "Memory Set",
+            "duration_ms": {
+              "fixed": 1500
+            },
+            "response_window_ms": null,
+            "display_timing_label": "1500 ms",
+            "stim_ids": [
+              "memory_set_text"
+            ],
+            "stimulus_example": {
+              "summary": "B D F",
+              "modality": "visual",
+              "draw_hint": "text",
+              "render_items": [
+                {
+                  "kind": "text",
+                  "text": "B D F",
+                  "color": "white",
+                  "pos": null,
+                  "height": 58.0
+                }
+              ]
+            },
+            "notes": ""
+          },
+          {
+            "phase_name": "retention",
+            "display_phase_label": "Retention",
+            "duration_ms": {
+              "fixed": 2500
+            },
+            "response_window_ms": null,
+            "display_timing_label": "2500 ms",
+            "stim_ids": [
+              "fixation"
+            ],
+            "stimulus_example": {
+              "summary": "+",
+              "modality": "visual",
+              "draw_hint": "text",
+              "render_items": [
+                {
+                  "kind": "text",
+                  "text": "+",
+                  "color": "white",
+                  "pos": null,
+                  "height": 48.0
+                }
+              ]
+            },
+            "notes": ""
+          },
+          {
+            "phase_name": "probe response",
+            "display_phase_label": "Probe",
+            "duration_ms": {
+              "fixed": 3000
+            },
+            "response_window_ms": {
+              "fixed": 3000
+            },
+            "display_timing_label": "3000 ms",
+            "stim_ids": [
+              "probe_text",
+              "probe_hint"
+            ],
+            "stimulus_example": {
+              "summary": "Probe: X + F = OLD (in set) J = NEW (not in set)",
+              "modality": "visual",
+              "draw_hint": "text",
+              "render_items": [
+                {
+                  "kind": "text",
+                  "text": "Probe: X",
+                  "color": "white",
+                  "pos": [
+                    0.0,
+                    50.0
+                  ],
+                  "height": 56.0
+                },
+                {
+                  "kind": "text",
+                  "text": "F = OLD (in set) J = NEW (not in set)",
+                  "color": "#ebebeb",
+                  "pos": [
+                    0.0,
+                    -120.0
+                  ],
+                  "height": 28.0
+                }
+              ]
+            },
+            "notes": ""
+          },
+          {
+            "phase_name": "feedback",
+            "display_phase_label": "Feedback",
+            "duration_ms": {
+              "fixed": 800
+            },
+            "response_window_ms": null,
+            "display_timing_label": "800 ms",
+            "stim_ids": [
+              "feedback_incorrect"
+            ],
+            "stimulus_example": {
+              "summary": "Incorrect",
+              "modality": "visual",
+              "draw_hint": "text",
+              "render_items": [
+                {
+                  "kind": "text",
+                  "text": "Incorrect",
+                  "color": "#f89999",
+                  "pos": null,
+                  "height": 34.0
+                }
+              ]
+            },
+            "notes": ""
+          },
+          {
+            "phase_name": "inter trial interval",
+            "display_phase_label": "ITI",
+            "duration_ms": {
+              "fixed": 1000
+            },
+            "response_window_ms": null,
+            "display_timing_label": "1000 ms",
+            "stim_ids": [
+              "fixation"
+            ],
+            "stimulus_example": {
+              "summary": "+",
+              "modality": "visual",
+              "draw_hint": "text",
+              "render_items": [
+                {
+                  "kind": "text",
+                  "text": "+",
+                  "color": "white",
+                  "pos": null,
+                  "height": 48.0
+                }
+              ]
+            },
+            "notes": ""
+          }
+        ],
+        "condition_variants": [
+          "set5",
+          "set7"
+        ],
+        "display_condition_note": "Also: Set5, Set7"
+      }
+    ],
+    "legend": []
+  }
+}
