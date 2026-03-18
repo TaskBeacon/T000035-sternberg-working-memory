@@ -42,6 +42,7 @@ task:
   feedback_score_incorrect: 0
   feedback_score_timeout: 0
   seed_mode: same_across_sub
+  overall_seed: 35035
 
 timing:
   memory_set_duration: 0.25
@@ -163,10 +164,6 @@ triggers:
     post_delay_ms: 1
   policy:
     strict: false
-
-controller:
-  random_seed: 35035
-
 sim:
   output_dir: outputs/sim
   seed: 35035

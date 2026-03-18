@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-import random
 import re
 from typing import Any
+import random
 
 
 def parse_set_size(condition_label: Any, default_size: int = 3) -> int:
@@ -23,81 +23,45 @@ class TrialSpec:
     probe_type: str  # old | new
 
 
-class SternbergController:
-    """Generate Sternberg trial materials and track score/accuracy."""
+def _normalize_letter_pool(values: Any) -> list[str]:
+    if not isinstance(values, (list, tuple)):
+        raise TypeError("letter_pool must be a sequence of stimulus items")
 
-    def __init__(
-        self,
-        *,
-        letter_pool: list[str],
-        probe_old_prob: float,
-        random_seed: int,
-        score_correct: int = 1,
-        score_incorrect: int = 0,
-        score_timeout: int = 0,
-    ) -> None:
-        if not letter_pool:
-            raise ValueError("letter_pool must be non-empty")
-        self.letter_pool = [str(x) for x in letter_pool]
-        self.probe_old_prob = float(probe_old_prob)
-        self.rng = random.Random(int(random_seed))
+    letters = [str(value).strip().upper() for value in values if str(value).strip()]
+    if not letters:
+        raise ValueError("letter_pool must be non-empty")
+    return letters
 
-        self.score_correct = int(score_correct)
-        self.score_incorrect = int(score_incorrect)
-        self.score_timeout = int(score_timeout)
 
-        self._trial_id = 0
-        self.total_score = 0
-        self.total_trials = 0
-        self.total_answered = 0
-        self.total_correct = 0
+def sample_trial_spec(
+    *,
+    rng: random.Random,
+    set_size: int,
+    letter_pool: Any,
+    probe_old_prob: Any,
+) -> TrialSpec:
+    pool = _normalize_letter_pool(letter_pool)
+    size = int(set_size)
+    if size > len(pool):
+        raise ValueError("set_size cannot exceed letter_pool length")
 
-    def next_trial_id(self) -> int:
-        self._trial_id += 1
-        return int(self._trial_id)
+    old_prob = max(0.0, min(1.0, float(probe_old_prob)))
+    memory_items = rng.sample(pool, k=size)
+    probe_old = bool(rng.random() < old_prob)
 
-    def build_trial(self, set_size: int) -> TrialSpec:
-        if set_size > len(self.letter_pool):
-            raise ValueError("set_size cannot exceed letter_pool length")
+    if probe_old:
+        probe_item = str(rng.choice(memory_items))
+        probe_type = "old"
+    else:
+        non_members = [item for item in pool if item not in memory_items]
+        if not non_members:
+            raise ValueError("letter_pool must include at least one non-member item for new probes")
+        probe_item = str(rng.choice(non_members))
+        probe_type = "new"
 
-        memory_items = self.rng.sample(self.letter_pool, k=int(set_size))
-        probe_old = bool(self.rng.random() < self.probe_old_prob)
-
-        if probe_old:
-            probe_item = str(self.rng.choice(memory_items))
-            probe_type = "old"
-        else:
-            non_members = [x for x in self.letter_pool if x not in memory_items]
-            probe_item = str(self.rng.choice(non_members))
-            probe_type = "new"
-
-        return TrialSpec(
-            set_size=int(set_size),
-            memory_items=[str(x) for x in memory_items],
-            probe_item=probe_item,
-            probe_type=probe_type,
-        )
-
-    def apply_score(self, *, is_correct: bool | None, timed_out: bool) -> dict[str, int]:
-        score_before = int(self.total_score)
-        if timed_out:
-            delta = int(self.score_timeout)
-        elif bool(is_correct):
-            delta = int(self.score_correct)
-        else:
-            delta = int(self.score_incorrect)
-        self.total_score = score_before + delta
-        return {"score_before": score_before, "score_delta": int(delta), "score_after": int(self.total_score)}
-
-    def record_trial(self, *, is_correct: bool | None, timed_out: bool) -> None:
-        self.total_trials += 1
-        if timed_out:
-            return
-        self.total_answered += 1
-        if bool(is_correct):
-            self.total_correct += 1
-
-    def accuracy(self) -> float:
-        if self.total_answered <= 0:
-            return 0.0
-        return float(self.total_correct / self.total_answered)
+    return TrialSpec(
+        set_size=size,
+        memory_items=[str(item) for item in memory_items],
+        probe_item=probe_item,
+        probe_type=probe_type,
+    )

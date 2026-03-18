@@ -6,7 +6,7 @@ variant: baseline
 cognitive_domain:
   - working_memory
   - cognitive_control
-maturity: draft
+maturity: smoke_tested
 version:
   release_tag: v0.1.0-dev
 contracts:

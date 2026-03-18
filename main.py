@@ -3,6 +3,7 @@ from __future__ import annotations
 from contextlib import nullcontext
 from functools import partial
 from pathlib import Path
+import random
 
 import pandas as pd
 from psychopy import core
@@ -19,10 +20,11 @@ from psyflow import (
     initialize_triggers,
     load_config,
     parse_task_run_options,
+    reset_trial_counter,
     runtime_context,
 )
 
-from src import SternbergController, run_trial
+from src import run_trial
 
 
 MODES = ("human", "qa", "sim")
@@ -94,16 +96,6 @@ def _run_impl(*, mode: str, cfg: dict, output_dir: Path | None, participant_id: 
     stim_bank = StimBank(win, cfg["stim_config"]).preload_all()
     settings.save_to_json()
 
-    controller_seed = int(cfg.get("controller_config", {}).get("random_seed", getattr(settings, "overall_seed", 2026)) or 2026)
-    controller = SternbergController(
-        letter_pool=list(getattr(settings, "letter_pool", ["B", "D", "F", "G", "H", "K", "L", "M"])),
-        probe_old_prob=float(getattr(settings, "probe_old_prob", 0.5)),
-        random_seed=controller_seed,
-        score_correct=int(getattr(settings, "feedback_score_correct", 1)),
-        score_incorrect=int(getattr(settings, "feedback_score_incorrect", 0)),
-        score_timeout=int(getattr(settings, "feedback_score_timeout", 0)),
-    )
-
     trigger_runtime.send(settings.triggers.get("exp_onset"))
 
     StimUnit("instruction_text", win, kb, runtime=trigger_runtime).add_stim(
@@ -115,11 +107,20 @@ def _run_impl(*, mode: str, cfg: dict, output_dir: Path | None, participant_id: 
     ).wait_and_continue()
 
     all_data = []
+    task_state = {"total_score": 0}
+    reset_trial_counter()
     total_blocks = int(getattr(settings, "total_blocks", 1))
-    condition_labels = list(getattr(settings, "conditions", ["set3", "set5", "set7"]))
+    condition_labels = [str(label) for label in list(getattr(settings, "conditions", ["set3", "set5", "set7"]))]
     condition_weights = settings.resolve_condition_weights()
 
     for block_i in range(total_blocks):
+        block_seed = getattr(settings, "overall_seed", 2025)
+        if isinstance(getattr(settings, "block_seed", None), list) and block_i < len(settings.block_seed):
+            block_seed = settings.block_seed[block_i]
+        if block_seed is None:
+            block_seed = int(getattr(settings, "overall_seed", 2025)) + block_i * 1009
+        block_rng = random.Random(int(block_seed))
+
         block = (
             BlockUnit(
                 block_id=f"block_{block_i}",
@@ -131,15 +132,16 @@ def _run_impl(*, mode: str, cfg: dict, output_dir: Path | None, participant_id: 
             .generate_conditions(condition_labels=condition_labels, weights=condition_weights, order="random")
             .on_start(lambda b: trigger_runtime.send(settings.triggers.get("block_onset")))
             .on_end(lambda b: trigger_runtime.send(settings.triggers.get("block_end")))
-            .run_trial(
-                partial(
-                    run_trial,
-                    stim_bank=stim_bank,
-                    controller=controller,
-                    trigger_runtime=trigger_runtime,
-                    block_id=f"block_{block_i}",
-                    block_idx=block_i,
-                )
+                .run_trial(
+                    partial(
+                        run_trial,
+                        stim_bank=stim_bank,
+                        trigger_runtime=trigger_runtime,
+                        rng=block_rng,
+                        task_state=task_state,
+                        block_id=f"block_{block_i}",
+                        block_idx=block_i,
+                    )
             )
             .to_dict(all_data)
         )
@@ -148,6 +150,7 @@ def _run_impl(*, mode: str, cfg: dict, output_dir: Path | None, participant_id: 
         answered = [t for t in block_trials if not bool(t.get("probe_timed_out", False))]
         correct = [t for t in answered if bool(t.get("is_correct", False))]
         block_acc = (len(correct) / len(answered)) if answered else 0.0
+        block_score = int(block_trials[-1].get("score_after", task_state["total_score"])) if block_trials else int(task_state["total_score"])
 
         if block_i < (total_blocks - 1):
             StimUnit("block", win, kb, runtime=trigger_runtime).add_stim(
@@ -156,17 +159,20 @@ def _run_impl(*, mode: str, cfg: dict, output_dir: Path | None, participant_id: 
                     block_num=block_i + 1,
                     total_blocks=total_blocks,
                     block_acc=block_acc,
-                    score_after=controller.total_score,
+                    score_after=block_score,
                 )
             ).wait_and_continue()
 
-    final_acc = controller.accuracy()
+    answered = [t for t in all_data if not bool(t.get("probe_timed_out", False))]
+    correct = [t for t in answered if bool(t.get("is_correct", False))]
+    final_acc = (len(correct) / len(answered)) if answered else 0.0
+    final_score = int(all_data[-1].get("score_after", task_state["total_score"])) if all_data else int(task_state["total_score"])
     StimUnit("goodbye", win, kb, runtime=trigger_runtime).add_stim(
         stim_bank.get_and_format(
             "good_bye",
             final_acc=final_acc,
-            total_score=controller.total_score,
-            total_trials=controller.total_trials,
+            total_score=final_score,
+            total_trials=len(all_data),
         )
     ).wait_and_continue(terminate=True)
 

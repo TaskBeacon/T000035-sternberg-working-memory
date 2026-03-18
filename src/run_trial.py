@@ -1,22 +1,10 @@
 from __future__ import annotations
 
 from functools import partial
+import random
 from typing import Any
-
-from psyflow import StimUnit, set_trial_context
-
-from .utils import SternbergController, parse_set_size
-
-
-def _deadline_s(value: Any) -> float | None:
-    if isinstance(value, (int, float)):
-        return float(value)
-    if isinstance(value, (list, tuple)) and value:
-        try:
-            return float(max(value))
-        except Exception:
-            return None
-    return None
+from psyflow import StimUnit, next_trial_id, resolve_deadline, set_trial_context
+from .utils import parse_set_size, sample_trial_spec
 
 
 def run_trial(
@@ -25,16 +13,22 @@ def run_trial(
     settings,
     condition,
     stim_bank,
-    controller: SternbergController,
     trigger_runtime,
+    rng: random.Random,
+    task_state: dict[str, int],
     block_id=None,
     block_idx=None,
 ):
     """Run one Sternberg memory-scanning trial."""
     condition_label = str(condition).strip().lower()
     set_size = parse_set_size(condition_label, default_size=3)
-    trial_spec = controller.build_trial(set_size)
-    trial_id = int(controller.next_trial_id())
+    trial_spec = sample_trial_spec(
+        rng=rng,
+        set_size=set_size,
+        letter_pool=getattr(settings, "letter_pool", ["B", "D", "F", "G", "H", "K", "L", "M"]),
+        probe_old_prob=getattr(settings, "probe_old_prob", 0.5),
+    )
+    trial_id = int(next_trial_id())
 
     old_key = str(getattr(settings, "old_key", "f")).strip().lower()
     new_key = str(getattr(settings, "new_key", "j")).strip().lower()
@@ -80,7 +74,7 @@ def run_trial(
         memory_set,
         trial_id=trial_id,
         phase="memory_set",
-        deadline_s=_deadline_s(memory_set_duration),
+        deadline_s=resolve_deadline(memory_set_duration),
         valid_keys=[],
         block_id=block_id_str,
         condition_id=condition_label,
@@ -99,7 +93,7 @@ def run_trial(
         retention,
         trial_id=trial_id,
         phase="retention",
-        deadline_s=_deadline_s(retention_duration),
+        deadline_s=resolve_deadline(retention_duration),
         valid_keys=[],
         block_id=block_id_str,
         condition_id=condition_label,
@@ -126,7 +120,7 @@ def run_trial(
         probe,
         trial_id=trial_id,
         phase="probe_response",
-        deadline_s=_deadline_s(probe_duration),
+        deadline_s=resolve_deadline(probe_duration),
         valid_keys=response_keys,
         block_id=block_id_str,
         condition_id=condition_label,
@@ -156,8 +150,20 @@ def run_trial(
     response_key = str(probe.get_state("response", "")).strip().lower()
     timed_out = response_key not in response_keys
     is_correct: bool | None = None if timed_out else (response_key == correct_key)
-    score_update = controller.apply_score(is_correct=is_correct, timed_out=timed_out)
-    controller.record_trial(is_correct=is_correct, timed_out=timed_out)
+    score_before = int(task_state.get("total_score", 0))
+    if timed_out:
+        score_delta = int(getattr(settings, "feedback_score_timeout", 0))
+    elif bool(is_correct):
+        score_delta = int(getattr(settings, "feedback_score_correct", 1))
+    else:
+        score_delta = int(getattr(settings, "feedback_score_incorrect", 0))
+    score_after = score_before + score_delta
+    task_state["total_score"] = int(score_after)
+    score_update = {
+        "score_before": int(score_before),
+        "score_delta": int(score_delta),
+        "score_after": int(score_after),
+    }
 
     if timed_out:
         feedback_id = "feedback_timeout"
@@ -181,7 +187,7 @@ def run_trial(
         feedback,
         trial_id=trial_id,
         phase="feedback",
-        deadline_s=_deadline_s(feedback_duration),
+        deadline_s=resolve_deadline(feedback_duration),
         valid_keys=[],
         block_id=block_id_str,
         condition_id=condition_label,
@@ -204,7 +210,7 @@ def run_trial(
         iti,
         trial_id=trial_id,
         phase="inter_trial_interval",
-        deadline_s=_deadline_s(iti_duration),
+        deadline_s=resolve_deadline(iti_duration),
         valid_keys=[],
         block_id=block_id_str,
         condition_id=condition_label,

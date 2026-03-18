@@ -11,12 +11,15 @@
 | PsyFlow Version | v0.1.x |
 | PsychoPy Version | 2024.x |
 | Modality | behavior |
+| Maturity | smoke_tested |
 | Language | English |
 | Voice Name | en-US-AriaNeural |
 
 ## 1. Task Overview
 
-This task implements a Sternberg-style working-memory paradigm. Each trial presents a memory set (letters), followed by a retention interval and a single probe item. Participants decide whether the probe was part of the memory set (`OLD`) or not (`NEW`). Set size (`3`, `5`, `7`) manipulates memory load, and reaction time/accuracy are recorded at the probe phase.
+This task implements a Sternberg-style working-memory paradigm for item-recognition under memory-load manipulation. Each trial presents a short memory set of letters, enforces a brief maintenance interval, and then probes whether a single letter belonged to the just-presented set. Participants respond `OLD` or `NEW`, allowing the task to capture both recognition accuracy and probe reaction time under different load levels.
+
+The current implementation keeps the experimental design explicit and auditable. Block-level load scheduling is handled by the native `BlockUnit.generate_conditions(...)` path, while trial-level stimulus details are expanded from the current load label into a concrete trial specification (`memory_items`, `probe_item`, `probe_type`, `correct_key`) immediately before execution. This preserves clear separation between experimental conditions, task logic, and runtime state.
 
 ## 2. Task Flow
 
@@ -43,9 +46,10 @@ This task implements a Sternberg-style working-memory paradigm. Each trial prese
 
 | Component | Description |
 |---|---|
-| `SternbergController.build_trial` | Samples memory set and probe type/item from configured pool. |
-| `SternbergController.apply_score` | Applies score delta based on correctness or timeout. |
-| `SternbergController.record_trial` | Tracks answered-trial accuracy and totals. |
+| Controller usage | No task-local controller is used because this task has no adaptive response-time or duration-control requirement. |
+| `sample_trial_spec(...)` | Samples memory-set letters and old/new probe item from the configured pool using pure helper logic. |
+| Trial-local scoring | Applies score delta directly from feedback config and stores cumulative score in minimal runtime state. |
+| `next_trial_id()` | Provides auditable sequential trial IDs without controller state. |
 
 ### Other Logic
 
@@ -107,11 +111,11 @@ All settings are defined in `config/config.yaml`.
 | `feedback_correct_onset` / `feedback_incorrect_onset` / `feedback_timeout_onset` | `50` / `51` / `52` |
 | `iti_onset` | `60` |
 
-### f. Adaptive Controller
+### f. Randomization and Feedback Parameters
 
 | Parameter | Value |
 |---|---|
-| `controller.random_seed` | `35035` |
+| `task.overall_seed` | `35035` |
 | `task.probe_old_prob` | `0.5` |
 | `task.feedback_score_correct` | `1` |
 | `task.feedback_score_incorrect` | `0` |
@@ -122,3 +126,17 @@ All settings are defined in `config/config.yaml`.
 A Sternberg-style short-term memory scanning design was implemented with load manipulation through memory-set size (`3`, `5`, `7`). Each trial comprised a memory-set encoding stage, a retention delay, and a probe-recognition response stage requiring binary old/new discrimination.
 
 Performance metrics include probe response time and accuracy, with optional score accumulation for participant feedback. Event triggers are emitted per phase to support synchronized acquisition workflows.
+
+## 5. Implementation Notes
+
+- The same task flow is used across `human`, `qa`, and `sim` modes; mode-specific behavior is limited to subject acquisition, trigger mocking, and runtime context wiring.
+- Trial IDs come from framework-native `next_trial_id()`, not a task-local controller object.
+- Deterministic trial sampling uses `task.overall_seed` together with per-block seeds from `TaskSettings`, so QA and sim can reproduce the same load-balanced block schedule and trial material sequence.
+- The task deliberately does not define a `controller` because there is no adaptive response-window, staircase, or dynamic timing requirement in this paradigm.
+
+## 6. Outputs and Review Status
+
+- Human runs write participant-specific CSV/JSON/log outputs under `outputs/human`.
+- QA mode writes smoke-test artifacts under `outputs/qa`, including trace/event reports used by `psyflow-qa`.
+- Simulation profiles cover both scripted and sampler responders so the probe response phase, expected response key, and score updates can be checked without manual interaction.
+- The task has been promoted to `smoke_tested` after passing local `psyflow-validate`, `psyflow-qa`, and both simulation profiles.

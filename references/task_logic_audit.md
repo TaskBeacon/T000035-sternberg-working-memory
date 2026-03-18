@@ -128,9 +128,9 @@ Probe semantics:
 
 ## 7. Architecture Decisions (Auditability)
 
-- Use built-in `BlockUnit.generate_conditions(...)` for load-label scheduling (`set3/set5/set7`) and keep trial-specific item/probe sampling in controller logic.
+- Use built-in `BlockUnit.generate_conditions(...)` for load-label scheduling (`set3/set5/set7`) with `TaskSettings.resolve_condition_weights()` as the only weight-resolution path.
+- Keep trial-specific item/probe sampling in pure helper logic inside task modules; do not introduce a task-local controller for this task.
 - Keep participant-facing labels and key text in `config/*.yaml` stimuli (`instruction_text`, `probe_hint`, feedback screens), avoiding hardcoded runtime wording.
-- Use `TaskSettings.resolve_condition_weights()` as the only weight-resolution path.
 - Keep probe decision as the single response phase for clear RT/accuracy interpretation.
 
 ## 8. Inference Log
