@@ -23,6 +23,8 @@ The current implementation keeps the experimental design explicit and auditable.
 
 ## 2. Task Flow
 
+![Task Flow](task_flow.png)
+
 ### Block-Level Flow
 
 | Step | Description |

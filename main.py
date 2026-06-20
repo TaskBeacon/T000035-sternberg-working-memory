@@ -25,6 +25,7 @@ from psyflow import (
 )
 
 from src import run_trial
+from src.utils import parse_set_size, sample_trial_spec
 
 
 MODES = ("human", "qa", "sim")
@@ -121,15 +122,34 @@ def _run_impl(*, mode: str, cfg: dict, output_dir: Path | None, participant_id: 
             block_seed = int(getattr(settings, "overall_seed", 2025)) + block_i * 1009
         block_rng = random.Random(int(block_seed))
 
-        block = (
-            BlockUnit(
-                block_id=f"block_{block_i}",
-                block_idx=block_i,
-                settings=settings,
-                window=win,
-                keyboard=kb,
+        block = BlockUnit(
+            block_id=f"block_{block_i}",
+            block_idx=block_i,
+            settings=settings,
+            window=win,
+            keyboard=kb,
+        ).generate_conditions(condition_labels=condition_labels, weights=condition_weights, order="random")
+        scheduled_conditions = []
+        for condition_label in list(block.conditions or []):
+            label = str(condition_label).strip().lower()
+            spec = sample_trial_spec(
+                rng=block_rng,
+                set_size=parse_set_size(label, default_size=3),
+                letter_pool=getattr(settings, "letter_pool", ["B", "D", "F", "G", "H", "K", "L", "M"]),
+                probe_old_prob=getattr(settings, "probe_old_prob", 0.5),
             )
-            .generate_conditions(condition_labels=condition_labels, weights=condition_weights, order="random")
+            scheduled_conditions.append(
+                {
+                    "condition": label,
+                    "set_size": spec.set_size,
+                    "memory_items": list(spec.memory_items),
+                    "probe_item": spec.probe_item,
+                    "probe_type": spec.probe_type,
+                }
+            )
+
+        block = (
+            block.add_condition(scheduled_conditions)
             .on_start(lambda b: trigger_runtime.send(settings.triggers.get("block_onset")))
             .on_end(lambda b: trigger_runtime.send(settings.triggers.get("block_end")))
                 .run_trial(
@@ -137,7 +157,6 @@ def _run_impl(*, mode: str, cfg: dict, output_dir: Path | None, participant_id: 
                         run_trial,
                         stim_bank=stim_bank,
                         trigger_runtime=trigger_runtime,
-                        rng=block_rng,
                         task_state=task_state,
                         block_id=f"block_{block_i}",
                         block_idx=block_i,

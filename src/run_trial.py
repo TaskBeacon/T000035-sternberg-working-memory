@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from functools import partial
-import random
 from typing import Any
 from psyflow import StimUnit, next_trial_id, resolve_deadline, set_trial_context
-from .utils import parse_set_size, sample_trial_spec
+from .utils import TrialSpec
 
 
 def run_trial(
@@ -14,19 +13,19 @@ def run_trial(
     condition,
     stim_bank,
     trigger_runtime,
-    rng: random.Random,
     task_state: dict[str, int],
     block_id=None,
     block_idx=None,
 ):
     """Run one Sternberg memory-scanning trial."""
-    condition_label = str(condition).strip().lower()
-    set_size = parse_set_size(condition_label, default_size=3)
-    trial_spec = sample_trial_spec(
-        rng=rng,
-        set_size=set_size,
-        letter_pool=getattr(settings, "letter_pool", ["B", "D", "F", "G", "H", "K", "L", "M"]),
-        probe_old_prob=getattr(settings, "probe_old_prob", 0.5),
+    if not isinstance(condition, dict):
+        raise ValueError("Sternberg run_trial requires a scheduled trial-spec condition dict.")
+    condition_label = str(condition.get("condition", "")).strip().lower()
+    trial_spec = TrialSpec(
+        set_size=int(condition["set_size"]),
+        memory_items=[str(item) for item in condition["memory_items"]],
+        probe_item=str(condition["probe_item"]),
+        probe_type=str(condition["probe_type"]),
     )
     trial_id = int(next_trial_id())
 
